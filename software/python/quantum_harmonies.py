@@ -150,8 +150,8 @@ def sort_into_pulse_durations(duration):
       return i
 
 sievert_averages = []
-initial_significance_level = 1#0.05
-significance_level = 1#0.05
+initial_significance_level = 0.05#0.5#0.05
+significance_level = 0.05#0.5#0.05
 def calculate_sievert_average_diff(pulses, time_interval): # CPM*scale_factor
   global sievert_averages
   geiger_muller_tube_scale_factor = 0.00812
@@ -373,8 +373,8 @@ def on_message(client, userdata, msg):
           lowering_significance_amount = math.floor(len(own_durations)/10)
           print("\tMore than 10 pulses were received within the episode, the value of the confidence level is increased by",lowering_significance_amount*0.01) # todo: wenn zu lange keine konfidenz hergestellt wird das signifikanzlevel erhöhen
           significance_level = significance_level + lowering_significance_amount*0.01 
-        print("\tAC:",confidence,", CL:",significance_level)
-        if (confidence < significance_level):
+        print("\tAC:",confidence,", CL:",significance_level,", upper freq found:", group_properties['q'+str(current_synth)+'_freqs_set'][0] ,", lower freq found:",group_properties['q'+str(current_synth)+'_freqs_set'][1])
+        if (confidence < significance_level and group_properties['q'+str(current_synth)+'_freqs_set'][0] and group_properties['q'+str(current_synth)+'_freqs_set'][1]):
           # reset confidence and other stuff for within qubit
           last_ts = timestamps[-1]
           timestamps = []
@@ -426,11 +426,17 @@ def on_message(client, userdata, msg):
               index_in_overall_counts = i
           if occurence_in_overall_counts == 1:
             occurence_in_overall_counts = index_in_overall_counts
+          else:
+            occurence_in_overall_counts = round(occurence_in_overall_counts / 2)
           if len(material_half_lifes) == 1:
             relative_position_in_counts = 0
           else:
             relative_position_in_counts = (occurence_in_overall_counts)/(len(material_half_lifes)-1)
           release_and_reverb_midi_value = relative_position_in_counts*120
+          # print("material_half_lifes",material_half_lifes)
+          # print("occurence_in_overall_counts",occurence_in_overall_counts)
+          # print("relative_position_in_counts",relative_position_in_counts)
+          # print("release_and_reverb_midi_value",release_and_reverb_midi_value)
           midiout.send_message(midi_note('left_slider_reverb',release_and_reverb_midi_value))
           midiout.send_message(midi_note('left_slider_delay',release_and_reverb_midi_value))
           midiout.send_message(midi_note('right_slider_reverb',release_and_reverb_midi_value))
