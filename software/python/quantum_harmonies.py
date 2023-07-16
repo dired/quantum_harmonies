@@ -17,15 +17,6 @@ if available_ports:
     midiout_2.open_port(5)
     midiout_3.open_port(6)
     midiout_4.open_port(7)
-# else:
-    # midiout_1.open_virtual_port("My virtual output")
-
-''' "neue" q1synth-pages aus python heraus starten bringt mich nicht weiter.
-import webbrowser
-import sys
-# webbrowser.open('https://iccmr-q1synth-proto.cephasteom.co.uk/', new=0, autoraise=True) # "new": 0 - same browser, 1 - new window, 2 - new tab  # "autoraise": focus or not
-sys.exit()
-'''
 def is_json(myjson):
   try:
     json.loads(myjson)
@@ -33,9 +24,6 @@ def is_json(myjson):
     return False
   return True
 
-'''
-_____________________After_INTRO
-'''
 current_synth = 0
 midiouts = [midiout_1,midiout_2,midiout_3,midiout_4]
 
@@ -151,25 +139,14 @@ group_properties = {
    "q3_measured": False,
    "q3_collapsed_result": 0,
 }
-# all_durations = []
-recorded_durations = []  # == all_durations, ich weiß garnicht was ich innerhalb eines qubits damit machen will
-  # doch, höchste duration ist höchste freq und niedrigste duration niedrigste freq, das habe ich hier aber bereits.
-  # dann muss ich schauen ob die freqs harmonisch sind aber das kann ich ja.
-  # und bei einer neuen gruppe resette ich sowieso alles
+recorded_durations = [] 
 own_durations = []
 def sort_into_pulse_durations(duration):
   global recorded_durations
-  # all_durations.append(duration) # nur um es zu speichern, wird ausgewertet bei frequenzwahl insgesamt
   recorded_durations.append(duration)
   recorded_durations.sort(reverse=True)
-  # print("recorded_durations",recorded_durations)
   for i, duration_value in enumerate(recorded_durations):
-    # print("looking for position",i,duration_value,duration)
     if duration_value == duration:
-      # if i == 0:
-      #     print("neue tiefste frequenz")
-      # elif i == 1:
-      #     print("neue höchste frequenz")
       return i
 
 sievert_averages = []
@@ -178,20 +155,13 @@ significance_level = 1#0.05
 def calculate_sievert_average_diff(pulses, time_interval): # CPM*scale_factor
   global sievert_averages
   geiger_muller_tube_scale_factor = 0.00812
-  # print("time_interval",time_interval)
-  # print("time_interval in seconds",time_interval/1000000)
-  # print("pulses",pulses)
   time_scale_factor = (1000000*60)/time_interval
   pulses_per_minute = pulses * time_scale_factor
-  # print("pulses_per_minute",pulses_per_minute)
-  average_sievert = pulses_per_minute*geiger_muller_tube_scale_factor # müsste eigentlich 1000000 sein aber die werte stimmen sonst nicht
-  # print("sievert",average_sievert)
+  average_sievert = pulses_per_minute*geiger_muller_tube_scale_factor 
   sievert_averages.append(average_sievert)
   diff = 0
   for average in sievert_averages:
      diff = diff + math.fabs(average - average_sievert)
-  # print("overall diff", diff)
-  # print("diff average", diff/len(sievert_averages))
   diff_average = diff/len(sievert_averages)
   if len(sievert_averages) == 1:
      return 1
@@ -200,30 +170,6 @@ def calculate_sievert_average_diff(pulses, time_interval): # CPM*scale_factor
 
 material_half_lifes = [] # to know upper and lower limit to map to release and reverb
 midi_notes_octaves = {'C0': [[176, 6, 1], [176, 4, 1]], 'D0': [[176, 6, 1], [176, 4, 19]], 'D#0': [[176, 6, 1], [176, 4, 37]], 'F0': [[176, 6, 1], [176, 4, 55]], 'G0': [[176, 6, 1], [176, 4, 74]], 'A0': [[176, 6, 1], [176, 4, 92]], 'B0': [[176, 6, 1], [176, 4, 110]], 'C1': [[176, 6, 31], [176, 4, 1]], 'D1': [[176, 6, 31], [176, 4, 19]], 'D#1': [[176, 6, 31], [176, 4, 37]], 'F1': [[176, 6, 31], [176, 4, 55]], 'G1': [[176, 6, 31], [176, 4, 74]], 'A1': [[176, 6, 31], [176, 4, 92]], 'B1': [[176, 6, 31], [176, 4, 110]], 'C2': [[176, 6, 61], [176, 4, 1]], 'D2': [[176, 6, 61], [176, 4, 19]], 'D#2': [[176, 6, 61], [176, 4, 37]], 'F2': [[176, 6, 61], [176, 4, 55]], 'G2': [[176, 6, 61], [176, 4, 74]], 'A2': [[176, 6, 61], [176, 4, 92]], 'B2': [[176, 6, 61], [176, 4, 110]], 'C3': [[176, 6, 91], [176, 4, 1]], 'D3': [[176, 6, 91], [176, 4, 19]], 'D#3': [[176, 6, 91], [176, 4, 37]], 'F3': [[176, 6, 91], [176, 4, 55]], 'G3': [[176, 6, 91], [176, 4, 74]], 'A3': [[176, 6, 91], [176, 4, 92]], 'B3': [[176, 6, 91], [176, 4, 110]], 'C4': [[176, 6, 121], [176, 4, 1]], 'D4': [[176, 6, 121], [176, 4, 19]], 'D#4': [[176, 6, 121], [176, 4, 37]], 'F4': [[176, 6, 121], [176, 4, 55]], 'G4': [[176, 6, 121], [176, 4, 74]], 'A4': [[176, 6, 121], [176, 4, 92]], 'B4': [[176, 6, 121], [176, 4, 110]]}
-
-def on_connect(client, userdata, flags, rc):
-    print("Connected to the MQTT broker")
-    # print("Connected with result code "+str(rc))
-    # Subscribing in on_connect() means that if we lose the connection and
-    # reconnect then subscriptions will be renewed.
-    # client.subscribe("$SYS/#")
-    client.subscribe("test")
-
-# def set_upper_freq(relative_position):
-#    if relative_position == 0: # neue tiefste freq
-      
-# def reset():
-#    global group_properties
-#    group_properties = {
-#     "q0_pulses": 0,
-#     "q0_freqs": [0,0], # index in midi_notes_octaves
-#     "q1_pulses": 0,
-#     "q1_freqs": [0,0],
-#     "q2_pulses": 0,
-#     "q2_freqs": [0,0],
-#     "q3_pulses": 0,
-#     "q3_freqs": [0,0],
-#   }
 
 def reset():
   for midiout in midiouts:
@@ -237,8 +183,6 @@ def reset():
     midiout.send_message(midi_note('right_slider_delay',64))
     midiout.send_message(midi_note('left_slider_reverb',64))
     midiout.send_message(midi_note('left_slider_delay',64))
-
-
 
 chord_factor = 2
 def get_new_lowest_frequency(index_in_midi_notes_octaves):
@@ -347,19 +291,11 @@ def get_new_highest_frequency(index_in_midi_notes_octaves):
 
 timestamp_of_last_measurement_for_2= 0
 timestamp_of_last_measurement_for_all= 0
-# The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
   global current_synth, midiouts, midi_notes, timestamps, group_properties, sievert_averages, significance_level, own_durations, recorded_durations, material_half_lifes, timestamp_of_last_measurement_for_2, timestamp_of_last_measurement_for_all
-  # t = time.time()
-  # print("what happens if this takes forever? will multiple be spawned?",t)
-  # time.sleep(5)
-  # ERGEBNIS: BLOCKEND, aber es gibt eine queue
-  # print(msg.topic+" "+str(msg.payload))
   if is_json(msg.payload.decode('utf-8')):
       midiout = midiouts[current_synth]
-      # print(json.loads(msg.payload.decode('utf-8')))
       msg = json.loads(msg.payload.decode('utf-8'))
-      # Erster Pulse überhaupt:
       if not timestamps:
         for timestamp in msg['timestamps']:
           timestamps.append(timestamp)
@@ -382,7 +318,7 @@ def on_message(client, userdata, msg):
             group_properties['q'+str(current_synth)+'_playing'] = True
         if time_elapsed_during_last_measurement_for_2 > 7: # for when the fourth qubit is sounding
           # artistic choice ("echo") - 
-          if (current_synth == 3): # artistic choice ("echo") to make chord sound for longer
+          if (current_synth == 3):
             for i in range(3): # third qubit needs to be played after it completed its measurement
               # artistic choice to alternate between sounding and not
               midiouts[i].send_message(midi_note('play',1))
@@ -391,35 +327,17 @@ def on_message(client, userdata, msg):
         current_timestamp = timestamps[-1]
         duration = current_timestamp - previous_timestamp
         index_in_durations = sort_into_pulse_durations(duration) # index in overall durations
-        # print("index_in_durations",index_in_durations)
-        # print(len(recorded_durations))
-        # print((index_in_durations+1)/len(recorded_durations))
         if len(recorded_durations) == 1:
           relative_position_in_durations = 0
         else:
           relative_position_in_durations = (index_in_durations)/(len(recorded_durations)-1) # index in overall durations
-        # print("relative_position_in_durations",relative_position_in_durations)
         index_in_midi_notes_octaves = math.floor(relative_position_in_durations*(len(midi_notes_octaves)-1))
-        # print("index_in_midi_notes_octaves",index_in_midi_notes_octaves)
-        # print("midi note to be played:",list(midi_notes_octaves)[index_in_midi_notes_octaves],";",list(midi_notes_octaves.values())[index_in_midi_notes_octaves])
-        #! Jetzt habe ich bereits einen mechanismus, in dem eine längste note zur tiefsten frequenz, eine höchste zu einer höheren, und wenn sehr viele gleiche auf einmal kommen würde sich das array auffüllen und man würde da es auch größer wird um einen mittelpunkt pendeln der dann auch immer größer wird.
         print("\tDuration of the pulse:",duration,"(maximum recorded:",max(recorded_durations),", minimum:",min(recorded_durations),")")
-
-        # FREQUENZEN SETZEN
-        # wir sammeln immer mehr durations, sobald wir sicher sind gehen wir zum nächsten
-          # beim nächsten gucken wir in den overall_durations der gruppe, ob die obere oder untere frequenz harmonisch ist
-        # sobald wir sicher sind mappen wir die tiefste und höchste frequenz, was beim allerersten ganz tief und ganz hoch ist aber bei den weiteren irgendwo dazwischen.
-          # wieviele messungen müssen wir machen damit wir sicher sind? => gelöst über significance_level (und bei erster messung ist confidence bei 1 also unendlich ungewiss)
         own_durations.append(duration)
         own_durations.sort(reverse=True)
         for i, duration_value in enumerate(own_durations):
-          # print("looking for position",i,duration_value,duration)
           if duration_value == duration:
-            # print("position in own_durations:",i)
-            # print("own_durations max:",(len(own_durations)-1))
             if i == 0 or len(own_durations) > 4 and i < 2:
-              
-              # print("neue niedrigste frequenz für",str(current_synth),list(midi_notes_octaves)[index_in_midi_notes_octaves])
               index_in_midi_notes_octaves = get_new_lowest_frequency(index_in_midi_notes_octaves)
               print("\tNew lowest frequency for",str(current_synth),":",list(midi_notes_octaves)[index_in_midi_notes_octaves])
               group_properties['q'+str(current_synth)+'_freqs'][0] = index_in_midi_notes_octaves
@@ -427,7 +345,6 @@ def on_message(client, userdata, msg):
               midiout.send_message(list(midi_notes_octaves.values())[index_in_midi_notes_octaves][1]) # note
               group_properties['q'+str(current_synth)+'_freqs_set'][0] = True
             elif i == (len(own_durations)-1):
-              # print("neue höchste frequenz für",str(current_synth),list(midi_notes_octaves)[index_in_midi_notes_octaves])
               index_in_midi_notes_octaves = get_new_highest_frequency(index_in_midi_notes_octaves)
               print("\tNew highest frequency for",str(current_synth),":",list(midi_notes_octaves)[index_in_midi_notes_octaves])
               group_properties['q'+str(current_synth)+'_freqs'][1] = index_in_midi_notes_octaves
@@ -439,10 +356,7 @@ def on_message(client, userdata, msg):
               midiout.send_message(note_note) # note
               group_properties['q'+str(current_synth)+'_freqs_set'][1] = True
 
-        # Qubits aus Superposition holen #LIMITATION: Später könnte man auch einen sinnvolleren mechanismus für das was in Superposition passiert machen
-        # midi_note('theta',msg['timestamps'][0] & 0b1111111)
-        # midi_note('phi',msg['timestamps'][0] >> 7 & 0b1111111)
-        # midi_note('lambda',msg['timestamps'][0] >> 14 & 0b1111111)
+        # Representing qubits in Superposition
         group_properties['q'+str(current_synth)+'_freqs_set'][0]
         theta_midi_value = msg['timestamps'][0] & 0b1111111
         phi_midi_value = msg['timestamps'][0] >> 7 & 0b1111111
@@ -451,10 +365,8 @@ def on_message(client, userdata, msg):
         midiout.send_message(midi_note('phi',phi_midi_value))
         midiout.send_message(midi_note('lambda',lambda_midi_value))
         group_properties['q'+str(current_synth)+'_inclinations'][0], group_properties['q'+str(current_synth)+'_inclinations'][1], group_properties['q'+str(current_synth)+'_inclinations'][2] = theta_midi_value, phi_midi_value, lambda_midi_value
-        # print("the current inclinations are:",group_properties['q'+str(current_synth)+'_inclinations'],"it would converge to",round(abs((63.5-theta_midi_value+1)/63.5),0))
 
         # calculate µS
-        # print("timestamps",timestamps)
         time_interval = timestamps[-1]-timestamps[0]
         confidence = calculate_sievert_average_diff(group_properties['q'+str(current_synth)+'_pulses'],time_interval)
         if len(own_durations) > 10:
@@ -462,7 +374,7 @@ def on_message(client, userdata, msg):
           print("\tMore than 10 pulses were received within the episode, the value of the confidence level is increased by",lowering_significance_amount*0.01) # todo: wenn zu lange keine konfidenz hergestellt wird das signifikanzlevel erhöhen
           significance_level = significance_level + lowering_significance_amount*0.01 
         print("\tAC:",confidence,", CL:",significance_level)
-        if (confidence < significance_level):# and group_properties['q'+str(current_synth)+'_freqs_set'][0] and group_properties['q'+str(current_synth)+'_freqs_set'][1]):
+        if (confidence < significance_level):
           # reset confidence and other stuff for within qubit
           last_ts = timestamps[-1]
           timestamps = []
@@ -473,13 +385,13 @@ def on_message(client, userdata, msg):
           group_properties['q'+str(current_synth)+'_freqs_set'][1] = False
           significance_level = initial_significance_level
           print("\t*Measurement")
-          # -> own measure
+          # -> own measurement algorithm
           measurement_collapses_into = 0
           if(round(abs((64-theta_midi_value+1)/64),0)): # collapses to 1
             measurement_collapses_into = 1
           else:
             measurement_collapses_into = 0
-          # ENTANGLEMENT, CNOT
+          # Entanglement
           if current_synth != 0:
             if group_properties['q'+str(current_synth-1)+'_collapsed_result'] == 1: # CNOT
               print("\t\t*Entanglement takes place through CNOT between",str(current_synth),"and",str(current_synth-1))
@@ -502,14 +414,12 @@ def on_message(client, userdata, msg):
           
 
           # Half-life
-          # print("group_properties",group_properties)
           current_count = group_properties['q'+str(current_synth)+'_pulses']
           material_half_lifes.append(current_count)
           group_properties['q'+str(current_synth)+'_pulses'] = 0
           material_half_lifes.sort()
           index_in_overall_counts = 0
           occurence_in_overall_counts = 0
-          # print("material_half_lifes",material_half_lifes)
           for i, count in enumerate(material_half_lifes):
             if count == current_count:
               occurence_in_overall_counts = occurence_in_overall_counts + 1
@@ -521,7 +431,6 @@ def on_message(client, userdata, msg):
           else:
             relative_position_in_counts = (occurence_in_overall_counts)/(len(material_half_lifes)-1)
           release_and_reverb_midi_value = relative_position_in_counts*120
-          # print("REVERB AND DELAY MIDI VALUE",release_and_reverb_midi_value)
           midiout.send_message(midi_note('left_slider_reverb',release_and_reverb_midi_value))
           midiout.send_message(midi_note('left_slider_delay',release_and_reverb_midi_value))
           midiout.send_message(midi_note('right_slider_reverb',release_and_reverb_midi_value))
@@ -530,7 +439,7 @@ def on_message(client, userdata, msg):
 
 
           # end cases
-          # still necessary (! exact poles not reachable via midi 0?): 
+          # still necessary fix (! exact poles not reachable via midi 0?): 
           time.sleep(2)
           if measurement_collapses_into == 1:
             midiout.send_message(midi_note('theta',1))
@@ -557,33 +466,17 @@ def on_message(client, userdata, msg):
               timestamp_of_last_measurement_for_all = time.time()
             # reset()
             current_synth = 0
-        # set_upper_freq(relative_position_in_durations) # muss der kürzesten duration entsprechen
-        # set_lower_freq(relative_position_in_durations) # muss der längsten duration entsprechen
-
-      # print(msg['timestamps'][0] & 0b1111111)
-      # print(msg['timestamps'][0] >> 7 & 0b1111111)
-      # print(msg['timestamps'][0] >> 14 & 0b1111111)
-      # print(msg['timestamps'][0] & 0b111111100000000000000)
-      # note_off = [0x80, 60, 0]
-      # midiout.send_message(note_off)
-      # current_synth = current_synth+1
-      # TODO: Ich muss das measurement und parameter-verschieben auslagern
   else:
       print("received not a json")
 
+def on_connect(client, userdata, flags, rc):
+    print("Connected to the MQTT broker")
+    client.subscribe("test")
 
 
-'''
-_____________________OUTRO
-'''
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 reset()
 client.connect("192.168.0.3", 1883, 60)
-
-# Blocking call that processes network traffic, dispatches callbacks and
-# handles reconnecting.
-# Other loop*() functions are available that give a threaded interface and a
-# manual interface.
 client.loop_forever()
