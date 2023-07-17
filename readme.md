@@ -24,7 +24,7 @@ and quantum concepts.
 
 For the software in `software/esp32` to work in your environment, the mqtt-broker-address, mqtt-topics, wifi-ssid and -password have to be set in `software/esp32/FreqCountESP.cpp`.
 
-The ESP32 running the code will wait for arriving pulses from a geiger counter (worth to mention, it could be something else). By the arrival of a pulse, an interrupt is triggered to measure the exact timestamp. Every 1ms, the existence of data is checked, and if a pulse was added to a list, the whole list is sent to MQTT broker via the configured topic.
+The ESP32 running the code will wait for arriving pulses from a geiger counter (worth to mention, it could be something else). In our code, PIN 14 is configured as the pulse-receiving PIN. By the arrival of a pulse, an interrupt is triggered to measure the exact timestamp. Every 1ms, the existence of data is checked, and if a pulse was added to a list, the whole list is sent to MQTT broker via the configured topic.
 
 ## Requirements for the software
 
@@ -34,7 +34,9 @@ The ESP32 running the code will wait for arriving pulses from a geiger counter (
 - 4 webbrowser tabs running [Q1Synth][https://iccmr-q1synth.cephasteom.co.uk/]
 - 4 virtual midi devices (if on windows: [loopMidi][https://www.tobias-erichsen.de/software/loopmidi.html])
 
-For the software to run on another system than windows, no extra software like loopMidi may be necessary, please refer to [python-rtmidi][https://spotlightkid.github.io/python-rtmidi/readme.html] and make the according changes at the beginnning of `software/esp32/quantum_harmonies.py`.
+For the software to run on another system than windows, no extra software like loopMidi may be necessary. I have not tried, please look for the way to create fake midi devices for your operating system if it is not windows for yourself.
+
+For my environment, I have for now hard-coded the indices of the midi-devices. Please refer to [python-rtmidi][https://spotlightkid.github.io/python-rtmidi/readme.html] and make the changes necessary for your environment at the beginnning of `software/esp32/quantum_harmonies.py`.
 
 Otherwise, four midi devices at the specified indices in code are assumed.
 
