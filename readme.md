@@ -1,4 +1,4 @@
-# Quantum Harmonies
+# Wrap-Up
 “Quantum harmonies” is an art project that intertwines
 geiger counter measurements with a simulated
 quantum computing circuit, translating emerging dynamics
@@ -15,6 +15,8 @@ during it’s journey are portrayed visually and audibly, aiming
 to offer an immersive way of understanding the dynamic
 relationship between geiger counter measurements
 and quantum concepts.
+
+# Quick-Start
 
 ## Requirements for the hardware
 
@@ -45,3 +47,8 @@ Likewise, the 4 running instances of Q1Synth have to be configured to the correc
 The mqtt-broker's address has to be configured at the very bottom of `quantum_harmonies.py` through the line stating `client.connect("192.168.0.3", 1883, 60)`.
 
 Then, the model watches for the expected mqtt-messages carrying the timestamps, and generates quantum harmonics.
+
+
+# Theory/Approach
+
+TBD
