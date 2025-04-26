@@ -48,7 +48,3 @@ The mqtt-broker's address has to be configured at the very bottom of `quantum_ha
 
 Then, the model watches for the expected mqtt-messages carrying the timestamps, and generates quantum harmonics.
 
-
-# Theory/Approach
-
-TBD
